@@ -1,0 +1,21 @@
+.toolbar-base {
+    padding: 1rem;
+}
+
+.top-toolbar {
+  width: 100%;
+  height: 3rem;
+  background-color: crimson;
+  position: fixed;
+  top: 0;
+}
+
+.right-toolbar {
+  width: 5rem;
+  height: 100%;
+  background-color: darkcyan;
+  margin-left: 93%;
+  position: fixed;
+  top: 0;
+  right: 0;
+}
