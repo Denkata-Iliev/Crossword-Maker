@@ -1,5 +1,6 @@
 .toolbar-base {
-    padding: 1rem;
+  padding: 1rem;
+  z-index: 100;
 }
 
 .top-toolbar {

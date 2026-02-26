@@ -1,28 +1,24 @@
+import { useState } from "react";
 import "./App.css";
+import CrosswordGrid from "./components/CrosswordGrid/CrosswordGrid";
 import Toolbar from "./components/Toolbar/Toolbar";
 import ToolbarItem from "./components/ToolbarItem/ToolbarItem";
 
 function App() {
+  const [mode, setMode] = useState("boxPlace");
+
+  const handleModeChange = () => {
+    setMode((prevMode) => (prevMode === "boxPlace" ? "crossword" : "boxPlace"));
+  };
+
   return (
     <>
-      <Toolbar className="top-toolbar">
-        Top Toolbar
-      </Toolbar>
+      <Toolbar className="top-toolbar">Top Toolbar</Toolbar>
       <Toolbar className="right-toolbar">
         Right Toolbar
-        <ToolbarItem onClick={() => console.log('Hi')}/>
+        <ToolbarItem onClick={handleModeChange} />
       </Toolbar>
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          marginTop: "3rem",
-          marginRight: "5rem",
-          backgroundColor: "gray",
-        }}
-      >
-        Main content
-      </div>
+      <CrosswordGrid mode={mode} />
     </>
   );
 }
