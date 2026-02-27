@@ -11,7 +11,7 @@ function App() {
   };
 
   return (
-    <div className="w-screen h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700 overflow-hidden">
+    <div className="w-screen h-screen bg-linear-to-br from-slate-50 via-slate-100 to-slate-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700 overflow-hidden">
       <Toolbar className="top-toolbar">Top Toolbar</Toolbar>
       <Toolbar className="right-toolbar">
         Right Toolbar

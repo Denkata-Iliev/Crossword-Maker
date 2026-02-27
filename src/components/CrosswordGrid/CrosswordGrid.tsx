@@ -44,7 +44,7 @@ const CrosswordGrid = ({ mode }: Props) => {
     return (
       <div
         key="box-place"
-        className="crossword-grid-container w-full h-full mt-12 mr-20 bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-slate-800 dark:via-slate-700 dark:to-slate-600 relative overflow-hidden"
+        className="crossword-grid-container w-full h-full mt-12 mr-20 bg-linear-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-slate-800 dark:via-slate-700 dark:to-slate-600 relative overflow-hidden"
         ref={boxPlaceAreaRef}
       >
         {hoveredCell && (
@@ -79,7 +79,7 @@ const CrosswordGrid = ({ mode }: Props) => {
   return (
     <div
       key="crossword"
-      className="crossword-grid-container w-full h-full mt-12 mr-20 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center"
+      className="crossword-grid-container w-full h-full mt-12 mr-20 bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center"
     >
       <div className="text-2xl font-semibold text-slate-700 dark:text-slate-300 bg-white/90 dark:bg-slate-800/90 px-6 py-4 rounded-xl backdrop-blur-sm border border-white/20 dark:border-slate-600/50 shadow-lg">
         Crossword Grid
