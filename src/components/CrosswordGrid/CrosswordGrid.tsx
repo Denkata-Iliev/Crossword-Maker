@@ -25,8 +25,8 @@ const CrosswordGrid = ({ mode }: Props) => {
   useEffect(() => {
     const drawBoxOverCursor = (event: MouseEvent) => {
       const rect = boxPlaceAreaRef.current!.getBoundingClientRect();
-      const x = roundToNearestCell(event.clientX - rect.left);
-      const y = roundToNearestCell(event.clientY - rect.top);
+      const x = roundToNearestCell(event.clientX - rect.left - (CELL_SIZE / 2));
+      const y = roundToNearestCell(event.clientY - rect.top - (CELL_SIZE / 2));
       setHoveredCell({ id: "hovered", row: y, col: x });
     };
     if (mode === "boxPlace" && boxPlaceAreaRef.current) {
@@ -46,6 +46,10 @@ const CrosswordGrid = ({ mode }: Props) => {
         key="box-place"
         className="crossword-grid-container w-full h-full mt-12 mr-20 bg-linear-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-slate-800 dark:via-slate-700 dark:to-slate-600 relative overflow-hidden"
         ref={boxPlaceAreaRef}
+        style={{
+          backgroundImage: "repeating-linear-gradient(#ccc 0 1px, transparent 1px 100%), repeating-linear-gradient(90deg, #ccc 0 1px, transparent 1px 100%)",
+          backgroundSize: `${CELL_SIZE}px ${CELL_SIZE}px`,
+        }}
       >
         {hoveredCell && (
           <GridCell
@@ -54,9 +58,7 @@ const CrosswordGrid = ({ mode }: Props) => {
             isHovered={true}
           />
         )}
-        <div className="absolute top-4 left-4 text-slate-700 dark:text-slate-300 font-medium bg-slate-100/90 dark:bg-slate-800/80 px-3 py-2 rounded-lg backdrop-blur-sm border border-slate-300 dark:border-slate-600/50 shadow-sm">
-          Box Place Mode
-        </div>
+        
         {placedCells.map((cell) => (
           <GridCell
             key={cell.id}
@@ -89,4 +91,3 @@ const CrosswordGrid = ({ mode }: Props) => {
 };
 
 export default CrosswordGrid;
-//TODO: add grid lines
