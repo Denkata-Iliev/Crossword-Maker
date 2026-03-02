@@ -17,8 +17,8 @@ const GridCell = ({ cell, onClick, isHovered }: CellProps) => {
       className={className}
       onClick={(e) => onClick(e, cell.id)}
       style={{
-        left: cell.col - CELL_SIZE / 2,
-        top: cell.row - CELL_SIZE / 2,
+        left: cell.col,
+        top: cell.row,
         width: CELL_SIZE,
         height: CELL_SIZE,
       }}
