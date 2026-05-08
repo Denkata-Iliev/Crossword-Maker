@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CELL_SIZE, type CellType } from "../../types/cell";
 import GridCell from "../Cell/GridCell";
+import useHeldKeys from "../../hooks/useHeldKeys";
 
 type Props = {
   mode: string;
@@ -11,36 +12,106 @@ const roundToNearestCell = (value: number) => {
 };
 
 const initialPlacedCells: CellType[] = [];
+const initialAdditionalHoverCellsNumber = 1;
 
 const CrosswordGrid = ({ mode }: Props) => {
   const [placedCells, setPlacedCells] = useState<CellType[]>(initialPlacedCells);
-  const [hoveredCell, setHoveredCell] = useState<CellType | null>(null);
+  const [mainHoveredCell, setMainHoveredCell] = useState<CellType | null>(null);
   const boxPlaceAreaRef = useRef<HTMLDivElement | null>(null);
+  const { isHeld, isHeldRef } = useHeldKeys(["w", "a", "s", "d"]);
+  const [additionalHoverCellsNumber, setAdditionalHoverCellsNumber] = useState(initialAdditionalHoverCellsNumber);
 
   useEffect(() => {
     setPlacedCells([]);
-    setHoveredCell(null);
   }, [mode]);
 
   useEffect(() => {
     const drawBoxOverCursor = (event: MouseEvent) => {
       const rect = boxPlaceAreaRef.current!.getBoundingClientRect();
-      const x = roundToNearestCell(event.clientX - rect.left - (CELL_SIZE / 2));
-      const y = roundToNearestCell(event.clientY - rect.top - (CELL_SIZE / 2));
-      setHoveredCell({ id: "hovered", row: y, col: x });
+      const x = roundToNearestCell(event.clientX - rect.left - CELL_SIZE / 2);
+      const y = roundToNearestCell(event.clientY - rect.top - CELL_SIZE / 2);
+
+      setMainHoveredCell({ id: `hovered-${crypto.randomUUID()}`, row: y, col: x });
     };
+
+    const handleMouseWheel = (event: WheelEvent) => {
+      const isDirectionHeld = isHeldRef("w") || isHeldRef("a") || isHeldRef("s")|| isHeldRef("d");
+      // scroll up
+      if (event.deltaY < 0 && isDirectionHeld) {
+        event.preventDefault();
+        setAdditionalHoverCellsNumber((prev) => prev + 1);
+      }
+
+      // scroll down
+      if (event.deltaY > 0 && isDirectionHeld) {
+        event.preventDefault();
+        setAdditionalHoverCellsNumber((prev) => (prev - 1 < 1 ? 1 : prev - 1));
+      }
+    };
+
     if (mode === "boxPlace" && boxPlaceAreaRef.current) {
       boxPlaceAreaRef.current.addEventListener("mousemove", drawBoxOverCursor);
+      window.addEventListener("wheel", handleMouseWheel, { passive: false });
     }
-
-    return () => {
-      if (boxPlaceAreaRef.current) {
-        boxPlaceAreaRef.current.removeEventListener("mousemove", drawBoxOverCursor);
-      }
+    
+    return () => {      
+      boxPlaceAreaRef.current?.removeEventListener("mousemove", drawBoxOverCursor);
+      window.removeEventListener("wheel", handleMouseWheel);
     };
   }, [mode]);
 
+  const getHoveredCells = () => {
+    if (!mainHoveredCell) return [];
+
+    const hoveredCells = [mainHoveredCell];
+    
+    if (isHeld("w")) {
+      for (let i = initialAdditionalHoverCellsNumber; i <= additionalHoverCellsNumber; i++) {
+        hoveredCells.push({ id: `hovered-${crypto.randomUUID()}`, row: mainHoveredCell.row - i * CELL_SIZE, col: mainHoveredCell.col });
+      }
+    }
+    if (isHeld("a")) {
+      for (let i = initialAdditionalHoverCellsNumber; i <= additionalHoverCellsNumber; i++) {
+        hoveredCells.push({ id: `hovered-${crypto.randomUUID()}`, row: mainHoveredCell.row, col: mainHoveredCell.col - i * CELL_SIZE });
+      }
+    }
+    if (isHeld("s")) {
+      for (let i = initialAdditionalHoverCellsNumber; i <= additionalHoverCellsNumber; i++) {
+        hoveredCells.push({ id: `hovered-${crypto.randomUUID()}`, row: mainHoveredCell.row + i * CELL_SIZE, col: mainHoveredCell.col });
+      }
+    }
+    if (isHeld("d")) {
+      for (let i = initialAdditionalHoverCellsNumber; i <= additionalHoverCellsNumber; i++) {
+        hoveredCells.push({ id: `hovered-${crypto.randomUUID()}`, row: mainHoveredCell.row, col: mainHoveredCell.col + i * CELL_SIZE });
+      }
+    }
+
+    return hoveredCells;
+  };
+
+  const handlePlacedCellClick = (e: React.MouseEvent, cellId: string) => {
+    if (e.button !== 0) return;
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (mode === "boxPlace") {
+      setPlacedCells((prev) => prev.filter((c) => c.id !== cellId));
+    }
+  };
+
+  const handleHoveredCellPlace = (hoveredCells: CellType[]) => {
+    // we need to map all hovered cells to a new arr with different ids,
+    // so React can differentiate between hovered and placed
+    const toPlace = hoveredCells.map((c) => ({ ...c, id: `cell-${crypto.randomUUID()}` }));
+
+    // filter out cells that are already placed to avoid multiple cells on the same place
+    const actuallyNewToPlace = toPlace.filter((c) => !placedCells.some((pc) => pc.row === c.row && pc.col === c.col));
+    setPlacedCells((prevPlacedCells) => [...prevPlacedCells, ...actuallyNewToPlace]);
+  };
+
   if (mode === "boxPlace") {
+    const hoveredCells = getHoveredCells();
+
     return (
       <div
         key="box-place"
@@ -51,28 +122,22 @@ const CrosswordGrid = ({ mode }: Props) => {
           backgroundSize: `${CELL_SIZE}px ${CELL_SIZE}px`,
         }}
       >
-        {hoveredCell && (
-          <GridCell
-            cell={hoveredCell}
-            onClick={() => setPlacedCells((prev) => [...prev, { ...hoveredCell, id: `cell-${crypto.randomUUID()}` }])}
-            isHovered={true}
-          />
-        )}
-        
+        {hoveredCells &&
+          hoveredCells.map((cell) => (
+            <GridCell
+              key={cell.id}
+              cell={cell}
+              onClick={() => handleHoveredCellPlace(hoveredCells)}
+              isHovered={true}
+            />
+          ))}
+
         {placedCells.map((cell) => (
           <GridCell
             key={cell.id}
             isHovered={false}
             cell={cell}
-            onClick={(e, cellId) => {
-              if (e.button !== 0) return;
-              e.stopPropagation();
-              e.preventDefault();
-
-              if (mode === "boxPlace") {
-                setPlacedCells((prev) => prev.filter((c) => c.id !== cellId));
-              }
-            }}
+            onClick={handlePlacedCellClick}
           />
         ))}
       </div>
